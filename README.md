@@ -269,3 +269,56 @@ Redis 中 集合是通过哈希表实现的，所以添加，删除，查找的�
 |19|ZUNIONSTORE destination numkeys key [key ...] |计算给定的一个或多个有序集的并集，并存储在新的 key 中|
 |20|ZSCAN key cursor [MATCH pattern] [COUNT count] |迭代有序集合中的元素（包括元素成员和元素分值）|
 
+## Redis HyperLogLog
+Redis 在 **2.8.9 **版本添加了 HyperLogLog 结构。
+
+Redis HyperLogLog 是用来做基数统计的算法，HyperLogLog 的优点是，在输入元素的数量或者体积非常非常大时，计算基数所需的空间总是固定 的、并且是很小的。
+
+在 Redis 里面，每个 HyperLogLog 键只需要花费 12 KB 内存，就可以计算接近 2^64 个不同元素的基 数。这和计算基数时，元素越多耗费内存就越多的集合形成鲜明对比。
+
+但是，因为 HyperLogLog 只会根据输入元素来计算基数，而不会储存输入元素本身，所以 HyperLogLog 不能像集合那样，返回输入的各个元素。 
+
+### 什么是基数?
+比如数据集 {1, 3, 5, 7, 5, 7, 8}， 那么这个数据集的基数集为 {1, 3, 5 ,7, 8}, 基数(不重复元素)为5。 基数估计就是在误差可接受的范围内，快速计算基数。
+
+
+### Redis HyperLogLog 命令
+|序号|命令|描述|
+|---|:---|:---|
+|1|PFADD key element [element ...]| |添加指定元素到 HyperLogLog 中。|
+|2|PFCOUNT key [key ...]| |返回给定 HyperLogLog 的基数估算值。|
+|3|PFMERGE destkey sourcekey [sourcekey ...]| |将多个 HyperLogLog 合并为一个 HyperLogLog |
+
+## Redis 发布订阅
+Redis 发布订阅(pub/sub)是一种消息通信模式：发送者(pub)发送消息，订阅者(sub)接收消息。
+Redis 客户端可以订阅任意数量的频道。
+### Redis 发布订阅命令
+|序号|命令|描述|
+|---|:---|:---|
+|1|PSUBSCRIBE pattern [pattern ...] |订阅一个或多个符合给定模式的频道|
+|2|PUBSUB subcommand [argument [argument ...]] |查看订阅与发布系统状态|
+|3|PUBLISH channel message |将信息发送到指定的频道|
+|4|PUNSUBSCRIBE [pattern [pattern ...]] |退订所有给定模式的频道|
+|5|SUBSCRIBE channel [channel ...] |订阅给定的一个或多个频道的信息|
+|6|UNSUBSCRIBE [channel [channel ...]] |指退订给定的频道|
+
+## Redis 事务
+
+Redis 事务可以一次执行多个命令， 并且带有以下两个重要的保证：
+* 事务是一个单独的隔离操作：事务中的所有命令都会序列化、按顺序地执行。事务在执行的过程中，不会被其他客户端发送来的命令请求所打断。
+* 事务是一个原子操作：事务中的命令要么全部被执行，要么全部都不执行。
+
+一个事务从开始到执行会经历以下三个阶段：
+* 开始事务。
+* 命令入队。
+* 执行事务。
+
+### Redis 事务命令
+|序号|命令|描述|
+|---|:---|:---|
+|1|DISCARD |取消事务，放弃执行事务块内的所有命令|
+|2|EXEC |执行所有事务块内的命令|
+|3|MULTI |标记一个事务块的开始|
+|4|UNWATCH |取消 WATCH 命令对所有 key 的监视|
+|5|WATCH key [key ...] |监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断|
+
